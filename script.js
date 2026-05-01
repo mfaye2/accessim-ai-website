@@ -74,7 +74,7 @@ async function envoyer() {
   input.value = "";
 
   try {
-    const res = await fetch("/chat", {
+    const res = await fetch("https://accessim-ai-server.onrender.com/chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
