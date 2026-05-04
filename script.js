@@ -146,3 +146,41 @@ if (contactForm) {
     });
   });
 }
+
+
+
+
+
+const contactForm = document.getElementById("contactForm");
+const formMessage = document.getElementById("formMessage");
+
+if (contactForm) {
+  contactForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const formData = new FormData(contactForm);
+
+    try {
+      const response = await fetch("/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams(formData).toString()
+      });
+
+      if (response.ok) {
+        formMessage.textContent = "Message envoyé avec succès ✅";
+        formMessage.style.color = "#00ff88";
+        contactForm.reset();
+      } else {
+        formMessage.textContent = "Erreur d’envoi ❌";
+        formMessage.style.color = "red";
+      }
+    } catch (error) {
+      formMessage.textContent = "Erreur serveur ❌";
+      formMessage.style.color = "red";
+      console.error(error);
+    }
+  });
+}

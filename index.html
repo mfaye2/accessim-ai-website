@@ -373,23 +373,21 @@
   <div class="contact-container">
     
     <!-- FORMULAIRE -->
-   <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" class="contact-form" id="contactForm">
+   <form name="contact" method="POST" data-netlify="true" class="contact-form" id="contactForm">
   <input type="hidden" name="form-name" value="contact">
 
-  <p style="display:none;">
-    <label>Ne pas remplir : <input name="bot-field"></label>
-  </p>
-
   <label>Nom</label>
-  <input type="text" name="name" placeholder="Votre nom" required>
+  <input type="text" name="name" required>
 
   <label>Email</label>
-  <input type="email" name="email" placeholder="Votre email" required>
+  <input type="email" name="email" required>
 
   <label>Demande</label>
-  <textarea name="message" placeholder="Votre message" required></textarea>
+  <textarea name="message" required></textarea>
 
   <button type="submit">Envoyer</button>
+
+  <p id="formMessage"></p>
 </form>
 
     <!-- INFOS -->
