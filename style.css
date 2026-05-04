@@ -735,3 +735,14 @@ footer {
 .contact-info p {
   margin-bottom: 15px;
 }
+
+.contact-info a {
+  color: #00ff88;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.contact-info a:hover {
+  color: #00cc6a;
+  text-decoration: underline;
+}
