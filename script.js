@@ -123,36 +123,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-
-const contactForm = document.getElementById("contactForm");
-
-if (contactForm) {
-  contactForm.addEventListener("submit", function (e) {
-    e.preventDefault();
-
-    const formData = new FormData(contactForm);
-
-    fetch("/", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams(formData).toString()
-    })
-    .then(() => {
-      window.location.href = "/merci/index.html";
-    })
-    .catch((error) => {
-      alert("Erreur lors de l’envoi. Réessayez.");
-      console.error(error);
-    });
-  });
-}
-
-
-
-
-
-
-
 const contactForm = document.getElementById("contactForm");
 const formMessage = document.getElementById("formMessage");
 
