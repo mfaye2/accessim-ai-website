@@ -133,13 +133,18 @@ if (contactForm) {
     const formData = new FormData(contactForm);
 
     try {
-      const response = await fetch("/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded"
-        },
-        body: new URLSearchParams(formData).toString()
-      });
+      
+      const response = await fetch("http://localhost:5678/webhook-test/contact", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    name: formData.get("name"),
+    email: formData.get("email"),
+    message: formData.get("message")
+  })
+});
 
       if (response.ok) {
         formMessage.textContent = "Message envoyé avec succès ✅";
