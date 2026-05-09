@@ -134,7 +134,13 @@ if (contactForm) {
 
     try {
 
-const response = await fetch("https://accessim-ai-n8n.onrender.com/webhook/contact", {
+const N8N_WEBHOOK_URL =
+  window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:5678/webhook-test/contact"
+    : "https://accessim-ai-n8n.onrender.com/webhook/contact";
+
+const response = await fetch(N8N_WEBHOOK_URL, {
+  
     method: "POST",
   headers: {
     "Content-Type": "application/json"
