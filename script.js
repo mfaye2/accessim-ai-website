@@ -133,9 +133,9 @@ if (contactForm) {
     const formData = new FormData(contactForm);
 
     try {
-      
-      const response = await fetch("http://localhost:5678/webhook-test/contact", {
-  method: "POST",
+
+const response = await fetch("https://accessim-ai-n8n.onrender.com/webhook/contact", {
+    method: "POST",
   headers: {
     "Content-Type": "application/json"
   },
