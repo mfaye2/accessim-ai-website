@@ -58,14 +58,17 @@ function toggleChat() {
   chatbot.classList.toggle("closed");
 }
 
-
-
-
-
+const API_URL =
+  window.location.hostname === "localhost"
+    ? "http://localhost:3000"
+    : "https://accessim-ai-server.onrender.com";
 
 
 async function envoyer() {
+
   const input = document.getElementById("message");
+  const sendButton = document.getElementById("sendChatBtn");
+
   const msg = input.value.trim();
 
   if (msg === "") return;
@@ -73,21 +76,61 @@ async function envoyer() {
   ajouterMessage("client", msg);
   input.value = "";
 
+  sendButton.disabled = true;
+  sendButton.textContent = "Patientez...";
+
+  ajouterMessage("agent", "Assistant réfléchit...");
+
   try {
-    const res = await fetch("https://accessim-ai-server.onrender.com/chat", {
+
+    const res = await fetch(`${API_URL}/chat`, {
+
       method: "POST",
+
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ message: msg })
+
+      body: JSON.stringify({
+        message: msg
+      })
+
     });
 
     const data = await res.json();
-    ajouterMessage("agent", data.reply);
+
+    const messagesAgent = document.querySelectorAll(".message-agent");
+    const dernierMessageAgent = messagesAgent[messagesAgent.length - 1];
+
+    if (data.reply) {
+      let texteReponse = data.reply;
+
+texteReponse = texteReponse.replace(
+  /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+  '<a href="$2" target="_blank">$1</a>'
+);
+
+dernierMessageAgent.innerHTML = texteReponse.replace(/\n/g, "<br>");
+    } else {
+      dernierMessageAgent.textContent = "Je n’ai pas reçu de réponse.";
+    }
+
   } catch (error) {
-    ajouterMessage("agent", "Erreur : le serveur ne répond pas.");
+
+    const messagesAgent = document.querySelectorAll(".message-agent");
+    const dernierMessageAgent = messagesAgent[messagesAgent.length - 1];
+
+    dernierMessageAgent.textContent = "Erreur : le serveur ne répond pas.";
+
+  } finally {
+
+    sendButton.disabled = false;
+    sendButton.textContent = "Envoyer";
+
   }
+
 }
+
 
 function ajouterMessage(type, texte) {
   const box = document.getElementById("chat-messages");
@@ -101,7 +144,14 @@ function ajouterMessage(type, texte) {
     div.classList.add("message-agent");
   }
 
-  div.innerHTML = texte.replace(/\n/g, "<br>");
+  let texteAffiche = texte;
+
+texteAffiche = texteAffiche.replace(
+  /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+  '<a href="$2" target="_blank">$1</a>'
+);
+
+div.innerHTML = texteAffiche.replace(/\n/g, "<br>");
 
   box.appendChild(div);
   box.scrollTop = box.scrollHeight;
@@ -130,7 +180,36 @@ if (contactForm) {
   contactForm.addEventListener("submit", async function (e) {
     e.preventDefault();
 
-    const formData = new FormData(contactForm);
+    const submitButton = contactForm.querySelector("button");
+
+submitButton.disabled = true;
+submitButton.textContent = "Envoi en cours...";
+
+formMessage.textContent = "";
+
+const formData = new FormData(contactForm);
+
+const name = formData.get("name").trim();
+const email = formData.get("email").trim();
+const message = formData.get("message").trim();
+
+if (name.length < 1) {
+  formMessage.textContent = "Veuillez entrer un nom valide.";
+  formMessage.style.color = "red";
+  return;
+}
+
+if (!email.includes("@")) {
+  formMessage.textContent = "Veuillez entrer un email valide.";
+  formMessage.style.color = "red";
+  return;
+}
+
+if (message.length < 10) {
+  formMessage.textContent = "Votre demande doit contenir au moins 10 caractères.";
+  formMessage.style.color = "red";
+  return;
+}
 
     try {
 
@@ -140,15 +219,15 @@ const N8N_WEBHOOK_URL =
     : "https://accessim-ai-n8n.onrender.com/webhook/contact";
 
 const response = await fetch(N8N_WEBHOOK_URL, {
-  
+
     method: "POST",
   headers: {
     "Content-Type": "application/json"
   },
   body: JSON.stringify({
-    name: formData.get("name"),
-    email: formData.get("email"),
-    message: formData.get("message")
+    name: name,
+    email: email,
+    message: message
   })
 });
 
@@ -165,5 +244,11 @@ const response = await fetch(N8N_WEBHOOK_URL, {
       formMessage.style.color = "red";
       console.error(error);
     }
+    finally {
+  submitButton.disabled = false;
+  submitButton.textContent = "Envoyer";
+}
+
+
   });
 }
