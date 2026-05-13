@@ -20,6 +20,14 @@ const percents = ["70%", "85%", "92%", "100%"];
 let activeStep = 0;
 let timer = null;
 
+/* =========================
+   MEMOIRE CONVERSATION
+========================= */
+
+let chatHistory = [];
+
+/* ========================= */
+
 function setActiveStep(index) {
   activeStep = index;
 
@@ -53,16 +61,19 @@ steps.forEach((step) => {
 startRotation();
 
 document.getElementById("year").textContent = new Date().getFullYear();
+
 function toggleChat() {
   const chatbot = document.getElementById("chatbot");
   chatbot.classList.toggle("closed");
-}
 
+  if (!chatbot.classList.contains("closed")) {
+    afficherMessageBienvenue();
+  }
+}
 const API_URL =
   window.location.hostname === "localhost"
     ? "http://localhost:3000"
     : "https://accessim-ai-server.onrender.com";
-
 
 async function envoyer() {
 
@@ -74,6 +85,18 @@ async function envoyer() {
   if (msg === "") return;
 
   ajouterMessage("client", msg);
+
+  /* =========================
+     AJOUT HISTORIQUE USER
+  ========================= */
+
+  chatHistory.push({
+    role: "user",
+    content: msg
+  });
+
+  /* ========================= */
+
   input.value = "";
 
   sendButton.disabled = true;
@@ -92,7 +115,8 @@ async function envoyer() {
       },
 
       body: JSON.stringify({
-        message: msg
+        message: msg,
+        history: chatHistory
       })
 
     });
@@ -103,14 +127,27 @@ async function envoyer() {
     const dernierMessageAgent = messagesAgent[messagesAgent.length - 1];
 
     if (data.reply) {
+
       let texteReponse = data.reply;
 
-texteReponse = texteReponse.replace(
-  /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
-  '<a href="$2" target="_blank">$1</a>'
-);
+      texteReponse = texteReponse.replace(
+        /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+        '<a href="$2" target="_blank">$1</a>'
+      );
 
-dernierMessageAgent.innerHTML = texteReponse.replace(/\n/g, "<br>");
+      dernierMessageAgent.innerHTML = texteReponse.replace(/\n/g, "<br>");
+
+      /* =========================
+         AJOUT HISTORIQUE IA
+      ========================= */
+
+      chatHistory.push({
+        role: "assistant",
+        content: data.reply
+      });
+
+      /* ========================= */
+
     } else {
       dernierMessageAgent.textContent = "Je n’ai pas reçu de réponse.";
     }
@@ -131,8 +168,8 @@ dernierMessageAgent.innerHTML = texteReponse.replace(/\n/g, "<br>");
 
 }
 
-
 function ajouterMessage(type, texte) {
+
   const box = document.getElementById("chat-messages");
 
   const div = document.createElement("div");
@@ -146,18 +183,19 @@ function ajouterMessage(type, texte) {
 
   let texteAffiche = texte;
 
-texteAffiche = texteAffiche.replace(
-  /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
-  '<a href="$2" target="_blank">$1</a>'
-);
+  texteAffiche = texteAffiche.replace(
+    /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+    '<a href="$2" target="_blank">$1</a>'
+  );
 
-div.innerHTML = texteAffiche.replace(/\n/g, "<br>");
+  div.innerHTML = texteAffiche.replace(/\n/g, "<br>");
 
   box.appendChild(div);
   box.scrollTop = box.scrollHeight;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+
   const input = document.getElementById("message");
 
   if (input) {
@@ -168,68 +206,71 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+
 });
-
-
-
 
 const contactForm = document.getElementById("contactForm");
 const formMessage = document.getElementById("formMessage");
 
 if (contactForm) {
+
   contactForm.addEventListener("submit", async function (e) {
+
     e.preventDefault();
 
     const submitButton = contactForm.querySelector("button");
 
-submitButton.disabled = true;
-submitButton.textContent = "Envoi en cours...";
+    submitButton.disabled = true;
+    submitButton.textContent = "Envoi en cours...";
 
-formMessage.textContent = "";
+    formMessage.textContent = "";
 
-const formData = new FormData(contactForm);
+    const formData = new FormData(contactForm);
 
-const name = formData.get("name").trim();
-const email = formData.get("email").trim();
-const message = formData.get("message").trim();
+    const name = formData.get("name").trim();
+    const email = formData.get("email").trim();
+    const message = formData.get("message").trim();
 
-if (name.length < 1) {
-  formMessage.textContent = "Veuillez entrer un nom valide.";
-  formMessage.style.color = "red";
-  return;
-}
+    if (name.length < 1) {
+      formMessage.textContent = "Veuillez entrer un nom valide.";
+      formMessage.style.color = "red";
+      return;
+    }
 
-if (!email.includes("@")) {
-  formMessage.textContent = "Veuillez entrer un email valide.";
-  formMessage.style.color = "red";
-  return;
-}
+    if (!email.includes("@")) {
+      formMessage.textContent = "Veuillez entrer un email valide.";
+      formMessage.style.color = "red";
+      return;
+    }
 
-if (message.length < 10) {
-  formMessage.textContent = "Votre demande doit contenir au moins 10 caractères.";
-  formMessage.style.color = "red";
-  return;
-}
+    if (message.length < 10) {
+      formMessage.textContent = "Votre demande doit contenir au moins 10 caractères.";
+      formMessage.style.color = "red";
+      return;
+    }
 
     try {
 
-const N8N_WEBHOOK_URL =
-  window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-    ? "http://localhost:5678/webhook-test/contact"
-    : "https://accessim-ai-n8n.onrender.com/webhook/contact";
+      const N8N_WEBHOOK_URL =
+        window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+          ? "http://localhost:5678/webhook-test/contact"
+          : "https://accessim-ai-n8n.onrender.com/webhook/contact";
 
-const response = await fetch(N8N_WEBHOOK_URL, {
+      const response = await fetch(N8N_WEBHOOK_URL, {
 
-    method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    name: name,
-    email: email,
-    message: message
-  })
-});
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          name: name,
+          email: email,
+          message: message
+        })
+
+      });
 
       if (response.ok) {
         formMessage.textContent = "Message envoyé avec succès ✅";
@@ -239,16 +280,69 @@ const response = await fetch(N8N_WEBHOOK_URL, {
         formMessage.textContent = "Erreur d’envoi ❌";
         formMessage.style.color = "red";
       }
+
     } catch (error) {
+
       formMessage.textContent = "Erreur serveur ❌";
       formMessage.style.color = "red";
+
       console.error(error);
+
+    } finally {
+
+      submitButton.disabled = false;
+      submitButton.textContent = "Envoyer";
+
     }
-    finally {
-  submitButton.disabled = false;
-  submitButton.textContent = "Envoyer";
+
+  });
+
+}
+
+let welcomeShown = false;
+let quickButtonsShown = false;
+
+function afficherMessageBienvenue() {
+  if (welcomeShown) return;
+
+  ajouterMessage(
+    "agent",
+    "Bonjour 👋 Je suis l’assistant Accessim AI. Je peux vous aider sur les chatbots IA, les automatisations n8n, les agents IA, les formulaires intelligents et les tableaux de bord. Quel est votre besoin ?"
+  );
+
+  ajouterBoutonsRapides();
+
+  welcomeShown = true;
 }
 
 
-  });
+function ajouterBoutonsRapides() {
+  if (quickButtonsShown) return;
+  const box = document.getElementById("chat-messages");
+
+  const div = document.createElement("div");
+  div.classList.add("quick-buttons");
+
+  div.innerHTML = `
+    <button onclick="envoyerMessageRapide('Je veux créer un chatbot IA pour mon site')">🤖 Chatbot IA</button>
+    <button onclick="envoyerMessageRapide('Je veux automatiser une tâche avec n8n')">⚙️ Automatisation</button>
+    <button onclick="envoyerMessageRapide('Je veux créer un tableau de bord')">📊 Dashboard</button>
+    <button onclick="window.open('https://calendly.com/fayelatyr61/30min', '_blank')">📅 Réserver un appel</button>
+  `;
+
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+  quickButtonsShown = true;
+}
+
+function envoyerMessageRapide(texte) {
+  const quickButtons = document.querySelector(".quick-buttons");
+
+  if (quickButtons) {
+    quickButtons.remove();
+  }
+
+  const input = document.getElementById("message");
+  input.value = texte;
+  envoyer();
 }

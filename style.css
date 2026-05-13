@@ -580,6 +580,10 @@ footer {
 
 
 
+
+
+
+
 #chatbot {
   position: fixed;
   bottom: 20px;
@@ -664,6 +668,45 @@ footer {
 
 
 
+/* Amélioration UI Chatbot */
+
+#chatbot {
+  width: 360px;
+  max-width: calc(100vw - 30px);
+  border-radius: 18px;
+}
+
+#chat-messages {
+  height: 330px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px;
+}
+
+.message {
+  max-width: 82%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+.message a {
+  color: #003cff;
+  font-weight: bold;
+  text-decoration: underline;
+  word-break: break-word;
+}
+
+#chat-input input {
+  min-width: 0;
+}
+
+
+
+
+
+
+
 
 /* SECTION CONTACT */
 .contact-section {
@@ -745,4 +788,28 @@ footer {
 .contact-info a:hover {
   color: #00cc6a;
   text-decoration: underline;
+}
+
+
+
+.quick-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.quick-buttons button {
+  border: none;
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.08);
+  color: white;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.quick-buttons button:hover {
+  background: #00ff99;
+  color: black;
 }
